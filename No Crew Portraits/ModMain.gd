@@ -5,7 +5,7 @@ extends Node
 const MOD_PRIORITY = 0
 # Name of the mod, used for writing to the logs
 const MOD_NAME = "No Crew Portraits"
-const MOD_VERSION = "1.0.0"
+const MOD_VERSION = "1.0.1"
 # Path of the mod folder, automatically generated on runtime
 var modPath:String = get_script().resource_path.get_base_dir() + "/"
 # Required var for the replaceScene() func to work
@@ -13,6 +13,7 @@ var _savedObjects := []
 
 var modConfig = {}
 #Initializes the configuration variable. Used by loadSettings.
+var modSettings = {}
 
 # Initialize the mod
 # This function is executed before the majority of the game is loaded
@@ -20,10 +21,15 @@ var modConfig = {}
 # Script and scene replacements should be done here, before the originals are loaded
 func _init(modLoader = ModLoader):
 	l("Initializing DLC")
-	loadDLC() # preloads DLC as things may break if this isn't done
+	# Modify Settings.gd first so we can load config and DLC
+	installScriptExtension("Settings.gd")
+	loadSettings()
 	
-	replaceScene("enceladus/CrewFaceOnEnceladus.tscn")
-	replaceScene("hud/OMS.tscn")
+	loadDLC() # preloads DLC as things may break if this isn't done
+	if modSettings["mainToggles"]["hideEnceladus"]:
+		replaceScene("enceladus/CrewFaceOnEnceladus.tscn")
+	if modSettings["mainToggles"]["hideOMS"]:
+		replaceScene("hud/OMS.tscn")
 	# Loads translation file. For this example, the english translation file is used. 
 #	updateTL("i18n/en.txt", "|")
 	
@@ -32,6 +38,16 @@ func _init(modLoader = ModLoader):
 func _ready():
 	l("Readying")
 	l("Ready")
+
+func loadSettings():
+	l(MOD_NAME + ": Loading mod settings")
+	var settings = load("res://Settings.gd").new()
+	settings.loadNoCrewPortraitsFromFile()
+	settings.saveNoCrewPortraitsToFile()
+	modSettings = settings.NoCrewPortraitsConfig
+	l(MOD_NAME + ": Current settings: %s" % modSettings)
+	settings.queue_free()
+	l(MOD_NAME + ": Finished loading settings")
 
 # Helper script to load translations using csv format
 # `path` is the path to the transalation file

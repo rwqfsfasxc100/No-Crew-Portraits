@@ -2,6 +2,6 @@
 
 id="hev.NoMoreCrew"
 name="No Crew Portraits"
-version="1.0.0"
+version="1.0.1"
 description="Removes the crew portraits from the main Enceladus Prime menu and in the OMS menu to reduce the cannyness"
 group="qol"
